@@ -1,209 +1,532 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#090D16" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>ReelDirector Studio — AI Highlight Reel Maker</title>
-  <link rel="manifest" id="pwa-manifest" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            display: ['Space Grotesk', 'sans-serif'],
-            serif: ['Playfair Display', 'serif'],
-          },
-          colors: {
-            obsidian: '#090D16',
-            surface: '#111827',
-            card: '#161F33',
-            borderDark: '#25324D',
-            amberAccent: '#F59E0B',
-            emeraldAccent: '#10B981',
-          }
-        }
-      }
-    };
-  </script>
-  <style>
-    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    body {
-      background-color: #090D16;
-      color: #F8FAFC;
-      font-family: 'Inter', sans-serif;
-      overscroll-behavior-y: none;
-    }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: #090D16; }
-    ::-webkit-scrollbar-thumb { background: #25324D; border-radius: 9999px; }
-    .glass-header {
-      background: rgba(9, 13, 22, 0.9);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-    .studio-gradient {
-      background: linear-gradient(135deg, #F59E0B 0%, #10B981 100%);
-    }
-    .studio-gradient-btn {
-      background: linear-gradient(135deg, #F59E0B 0%, #EA580C 50%, #10B981 100%);
-      background-size: 200% 200%;
-      animation: gradShift 6s ease infinite;
-    }
-    @keyframes gradShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-    input[type="range"] {
-      accent-color: #F59E0B;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>ReelDirector Studio</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #141822;
+    --panel-2: #1c2230;
+    --border: #2a3245;
+    --accent: #3b82f6;
+    --accent-2: #8b5cf6;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body { padding-bottom: 100px; }
+  header {
+    background: #0b0d12;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { font-weight: 800; font-size: 1.05rem; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: 0.68rem; background: linear-gradient(135deg, var(--accent), var(--accent-2)); padding: 2px 7px; border-radius: 999px; font-weight: 700; }
+  .btn-auto {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 14px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 14px 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .tab-btn.active { color: #fff; border-bottom-color: var(--accent); background: rgba(59, 130, 246, 0.12); }
+  .container { max-width: 680px; margin: 0 auto; padding: 14px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .card-title { font-size: 0.92rem; font-weight: 700; margin: 0 0 10px 0; display: flex; justify-content: space-between; align-items: center; }
+  .sub { font-size: 0.78rem; color: var(--muted); }
+  .file-label-btn {
+    display: block;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 20px 14px;
+    text-align: center;
+    background: var(--panel-2);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    width: 100%;
+    touch-action: manipulation;
+  }
+  .btn-secondary { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); }
+  .btn-sm { padding: 8px 12px; font-size: 0.8rem; width: auto; }
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .chip.selected {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .field-row { margin-bottom: 12px; }
+  .field-row label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(42, 50, 69, 0.6);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .clip-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 8px;
+    gap: 8px;
+  }
+  .clip-meta { overflow: hidden; flex: 1; }
+  .clip-name { font-size: 0.84rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .clip-dur { font-size: 0.74rem; color: var(--success); margin-top: 2px; }
+  canvas {
+    width: 100%;
+    max-height: 420px;
+    background: #000;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+  }
+  .timeline-list { max-height: 220px; overflow-y: auto; margin-top: 10px; }
+  .edl-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    padding: 8px 10px;
+    background: var(--panel-2);
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .status-bar {
+    font-size: 0.82rem;
+    color: var(--warn);
+    margin-top: 8px;
+    text-align: center;
+    min-height: 20px;
+  }
+  .hidden { display: none !important; }
+  .sr-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+  }
+</style>
 </head>
-<body class="min-h-screen pb-32 select-none">
+<body>
 
-  <!-- Top App Bar -->
-  <header class="sticky top-0 z-40 glass-header border-b border-borderDark px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2.5">
-      <div class="w-9 h-9 rounded-xl studio-gradient flex items-center justify-center shadow-lg text-slate-950 font-black">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
+<header>
+  <div class="brand">🎬 ReelDirector <span class="badge">STUDIO</span></div>
+  <button type="button" class="btn-auto" onclick="autoMakeReel()">⚡ Auto-Make</button>
+</header>
+
+<div class="tabs">
+  <button type="button" class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">1. Clips & Audio</button>
+  <button type="button" class="tab-btn" id="tabBtn2" onclick="switchTab(2)">2. Director</button>
+  <button type="button" class="tab-btn" id="tabBtn3" onclick="switchTab(3)">3. Preview & Save</button>
+</div>
+
+<div class="container">
+  <!-- TAB 1: CLIPS & AUDIO -->
+  <div class="section active" id="sec1">
+    <div class="card">
+      <div class="card-title">
+        <span>Source MP4 Videos</span>
+        <span class="sub" id="totalSourceLabel">0 clips (0.0s)</span>
       </div>
-      <div>
-        <h1 class="text-base font-extrabold tracking-tight text-white leading-none">ReelDirector <span class="text-amber-400">Studio</span></h1>
-        <p class="text-[11px] text-slate-400 mt-0.5">Mobile Highlight Reel & Audio Engine</p>
+      <label class="file-label-btn" for="videoInput">
+        <div style="font-size:1.5rem;margin-bottom:4px;">📁</div>
+        <div style="font-weight:700;font-size:0.9rem;">Tap to Add MP4 Files from Phone</div>
+        <div class="sub">Select one or multiple videos to compile</div>
+      </label>
+      <input type="file" id="videoInput" accept="video/*,.mp4,.mov,.mkv" multiple class="sr-input" onchange="handleVideoUpload(event)" />
+      <div id="clipList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Music & Audio Track</span><span class="sub">Optional</span></div>
+      <div class="field-row">
+        <label class="btn btn-secondary" for="audioInput" style="margin-bottom:0;">🎵 Pick Audio / Song from Phone</label>
+        <input type="file" id="audioInput" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" class="sr-input" onchange="handleAudioUpload(event)" />
+        <div class="sub" id="audioFileName" style="margin-top:8px;">No custom audio selected (using original clip audio)</div>
+      </div>
+      <div class="field-row">
+        <label>Music Volume: <span id="musicVolVal">80%</span></label>
+        <input type="range" id="musicVol" min="0" max="100" value="80" oninput="document.getElementById('musicVolVal').textContent=this.value+'%'" />
+      </div>
+      <div class="field-row">
+        <label>Original Video Audio: <span id="clipVolVal">35%</span></label>
+        <input type="range" id="clipVol" min="0" max="100" value="35" oninput="document.getElementById('clipVolVal').textContent=this.value+'%'" />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Smooth Audio Fade In / Out</span>
+        <input type="checkbox" id="audioFade" checked />
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <button id="installAppBtn" class="px-3 py-1.5 rounded-xl bg-card border border-borderDark text-xs font-semibold text-emerald-400 hover:bg-slate-800 transition flex items-center gap-1">
-        <span>📲</span>
-        <span>App Mode</span>
-      </button>
-    </div>
-  </header>
+    <button type="button" class="btn" onclick="switchTab(2)">Next: Director Controls →</button>
+  </div>
 
-  <!-- Toast Banner -->
-  <div id="toastBanner" class="fixed top-16 left-4 right-4 z-50 pointer-events-none flex justify-center transition-all duration-300 opacity-0 -translate-y-3">
-    <div id="toastText" class="bg-slate-900/95 border border-amber-500/40 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-2xl max-w-md text-center">
-      Ready
+  <!-- TAB 2: DIRECTOR CONTROLS -->
+  <div class="section" id="sec2">
+    <div class="card">
+      <div class="card-title">Target Reel Length</div>
+      <div class="chip-grid" id="lengthChips">
+        <div class="chip selected" data-val="60" onclick="selectChip('lengthChips', this)">1 Min (60s)</div>
+        <div class="chip" data-val="180" onclick="selectChip('lengthChips', this)">3 Min (180s)</div>
+        <div class="chip" data-val="300" onclick="selectChip('lengthChips', this)">5 Min (300s)</div>
+        <div class="chip" data-val="custom" onclick="selectChip('lengthChips', this)">Custom</div>
+      </div>
+      <div class="field-row hidden" id="customLengthBox" style="margin-top:10px;">
+        <label>Custom Length (seconds)</label>
+        <input type="number" id="customSeconds" value="45" min="5" max="1800" />
+      </div>
+      <div class="toggle-row" style="margin-top:8px;">
+        <span style="font-size:0.84rem;">Loop & remix clips if shorter than target</span>
+        <input type="checkbox" id="allowLoop" checked />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Theme / Vibe</div>
+      <div class="chip-grid" id="themeChips">
+        <div class="chip selected" data-val="home" onclick="selectChip('themeChips', this)">🏡 Home Video</div>
+        <div class="chip" data-val="music" onclick="selectChip('themeChips', this)">🎸 Music Video</div>
+        <div class="chip" data-val="cinematic" onclick="selectChip('themeChips', this)">🎥 Cinematic</div>
+        <div class="chip" data-val="energy" onclick="selectChip('themeChips', this)">⚡ High-Energy</div>
+        <div class="chip" data-val="travel" onclick="selectChip('themeChips', this)">🌲 Chill / Travel</div>
+        <div class="chip" data-val="retro" onclick="selectChip('themeChips', this)">📼 Clean Retro</div>
+        <div class="chip" data-val="doc" onclick="selectChip('themeChips', this)">🎙️ Documentary</div>
+        <div class="chip" data-val="neon" onclick="selectChip('themeChips', this)">🌃 Neon Nightlife</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Clip Selection & Aspect Ratio</div>
+      <div class="field-row">
+        <label>Clip Selection Mode</label>
+        <select id="selectionMode">
+          <option value="balanced">Balanced (Even across all videos)</option>
+          <option value="peaks">Action & Motion Peaks</option>
+          <option value="chronological">Chronological Story Order</option>
+          <option value="shuffled">Dynamic Shuffle Mix</option>
+          <option value="fast">Rapid-Fire Montage Cuts</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <label>Aspect Ratio</label>
+        <div class="chip-grid" id="aspectChips">
+          <div class="chip selected" data-val="9:16" onclick="selectChip('aspectChips', this)">9:16 Vertical</div>
+          <div class="chip" data-val="16:9" onclick="selectChip('aspectChips', this)">16:9 Wide</div>
+          <div class="chip" data-val="1:1" onclick="selectChip('aspectChips', this)">1:1 Square</div>
+          <div class="chip" data-val="4:5" onclick="selectChip('aspectChips', this)">4:5 Social</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Transitions & Visual Effects</div>
+      <div class="field-row">
+        <label>Transition Style</label>
+        <select id="transitionStyle">
+          <option value="blend">Blending (Cross-Dissolve)</option>
+          <option value="fade">Smooth Dip to Black</option>
+          <option value="slide">Sleek Slide Wipe</option>
+          <option value="zoom">Zoom Punch Cut</option>
+          <option value="cut">Clean Hard Cut</option>
+        </select>
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Sharpen Clarity</span>
+        <input type="checkbox" id="fxSharpen" checked />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Slow Motion Highlights (0.65x)</span>
+        <input type="checkbox" id="fxSlowMo" />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Smooth Ken Burns Zoom</span>
+        <input type="checkbox" id="fxZoom" checked />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Remove / Replace Background</span>
+        <input type="checkbox" id="fxBgReplace" onchange="document.getElementById('bgOptions').classList.toggle('hidden', !this.checked)" />
+      </div>
+      <div id="bgOptions" class="hidden" style="padding-top:8px;">
+        <label class="sub">Replacement Backdrop Color</label>
+        <input type="color" id="bgColor" value="#1e293b" style="width:100%;height:36px;border:none;border-radius:8px;margin-top:4px;" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Dynamic Captions & Title Card</div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Enable Opening Title & Captions</span>
+        <input type="checkbox" id="enableCaptions" />
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <label>Opening Title Text</label>
+        <input type="text" id="titleText" placeholder="e.g., Summer Highlights 2026" />
+      </div>
+      <div class="field-row">
+        <label>Caption Style</label>
+        <select id="captionStyle">
+          <option value="bold">Bold Pop-In</option>
+          <option value="lower">Clean Lower-Third</option>
+          <option value="kinetic">Center Kinetic Subtitle</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;">
+      <button type="button" class="btn btn-secondary" onclick="switchTab(1)">← Clips</button>
+      <button type="button" class="btn" onclick="buildAndPreview()">🎬 Build Highlight Reel →</button>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <main class="max-w-xl mx-auto px-4 pt-4 space-y-5">
-
-    <!-- =================================================================== -->
-    <!-- TAB 1: 1. CLIPS & AUDIO                                             -->
-    <!-- =================================================================== -->
-    <section id="tab-clips" class="space-y-4">
-
-      <!-- Video Clips Card -->
-      <div class="bg-card border border-borderDark rounded-3xl p-4 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-              Source MP4 / Video Clips
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Add videos from your phone gallery. Lock clips to guarantee inclusion.</p>
-          </div>
-          <span id="totalFootageBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-slate-900 text-amber-400 border border-borderDark">
-            0:00 total
-          </span>
-        </div>
-
-        <input type="file" id="videoFileInput" accept="video/*,video/mp4" multiple class="hidden" />
-
-        <div id="videoDropZone" class="border-2 border-dashed border-slate-700 hover:border-amber-400 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-950/60 active:scale-[0.99]">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 mx-auto flex items-center justify-center mb-2.5">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <p class="text-sm font-bold text-white">Tap to Select MP4 Videos from Phone</p>
-          <p class="text-xs text-slate-400 mt-1">Supports multiple files • Processed 100% locally on device</p>
-        </div>
-
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <button id="loadSamplesBtn" class="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 transition">
-            <span>🎬</span>
-            <span>Load 3 Sample Clips (Instant Demo)</span>
-          </button>
-
-          <button id="clearAllClipsBtn" class="hidden text-xs font-semibold text-rose-400 hover:text-rose-300 px-2.5 py-1.5 rounded-xl bg-rose-500/10">
-            Clear All
-          </button>
-        </div>
-
-        <!-- Uploaded Clip List -->
-        <div id="clipsContainer" class="space-y-2.5">
-          <div class="text-center py-6 text-xs text-slate-500">
-            No video clips added yet. Tap above to pick MP4 files or load sample clips.
-          </div>
-        </div>
+  <!-- TAB 3: PREVIEW & EXPORT -->
+  <div class="section" id="sec3">
+    <div class="card">
+      <div class="card-title">
+        <span>Reel Preview</span>
+        <span class="sub" id="reelSummaryLabel">Not built yet</span>
       </div>
+      <canvas id="previewCanvas" width="540" height="960"></canvas>
+      <div class="status-bar" id="statusBar">Add clips and tap Build Highlight Reel</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+        <button type="button" class="btn btn-secondary" id="playPauseBtn" onclick="togglePlay()">▶ Play Preview</button>
+        <button type="button" class="btn btn-secondary" onclick="buildAndPreview(true)">🔀 Shuffle Cuts</button>
+      </div>
+      <button type="button" class="btn" style="margin-top:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);" id="exportBtn" onclick="exportReel()">💾 Export & Save to Gallery</button>
+    </div>
 
-      <!-- Custom Music & Audio Mix Card -->
-      <div class="bg-card border border-borderDark rounded-3xl p-4 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Music & Sound Track
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Upload your own song/audio or use the built-in studio beat.</p>
-          </div>
-          <span id="audioSourceBadge" class="text-[11px] font-semibold px-2.5 py-1 rounded-xl bg-slate-900 text-emerald-400 border border-borderDark">
-            No Music
-          </span>
+    <div class="card">
+      <div class="card-title"><span>Generated Cut List</span><span class="sub" id="cutCountLabel">0 cuts</span></div>
+      <div class="timeline-list" id="edlList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let sourceClips = [];
+  let customAudioEl = null;
+  let customAudioName = '';
+  let timeline = [];
+  let isPlaying = false;
+  let playStartTime = 0;
+  let currentReelTime = 0;
+  let totalReelDuration = 60;
+  let animFrameId = null;
+
+  function switchTab(num) {
+    for (let i = 1; i <= 3; i++) {
+      const sec = document.getElementById('sec' + i);
+      const btn = document.getElementById('tabBtn' + i);
+      if (sec) sec.classList.toggle('active', i === num);
+      if (btn) btn.classList.toggle('active', i === num);
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function selectChip(groupId, el) {
+    document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (groupId === 'lengthChips') {
+      document.getElementById('customLengthBox').classList.toggle('hidden', el.dataset.val !== 'custom');
+    }
+  }
+
+  function getSelectedChip(groupId) {
+    const el = document.querySelector('#' + groupId + ' .chip.selected');
+    return el ? el.dataset.val : '';
+  }
+
+  function loadVideoMetadataSafe(file) {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const vid = document.createElement('video');
+      vid.preload = 'metadata';
+      vid.muted = true;
+      vid.playsInline = true;
+      vid.setAttribute('playsinline', '');
+      vid.src = url;
+
+      let settled = false;
+      const done = (dur) => {
+        if (settled) return;
+        settled = true;
+        resolve({ url, vid, duration: (dur && isFinite(dur) && dur > 0) ? dur : 6.0 });
+      };
+
+      vid.onloadedmetadata = () => done(vid.duration);
+      vid.ondurationchange = () => { if (vid.duration > 0) done(vid.duration); };
+      vid.onerror = () => done(6.0);
+      setTimeout(() => done(vid.duration || 6.0), 2000);
+      try { vid.load(); } catch (e) { done(6.0); }
+    });
+  }
+
+  async function handleVideoUpload(e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    document.getElementById('totalSourceLabel').textContent = 'Loading videos...';
+
+    for (const file of files) {
+      const { url, vid, duration } = await loadVideoMetadataSafe(file);
+      sourceClips.push({
+        id: Math.random().toString(36).slice(2),
+        name: file.name || 'Video Clip',
+        url,
+        video: vid,
+        duration,
+        locked: false
+      });
+    }
+    renderClipList();
+  }
+
+  function renderClipList() {
+    const list = document.getElementById('clipList');
+    list.innerHTML = '';
+    let total = 0;
+    sourceClips.forEach((clip, idx) => {
+      total += clip.duration;
+      const div = document.createElement('div');
+      div.className = 'clip-item';
+      div.innerHTML = `
+        <div class="clip-meta">
+          <div class="clip-name">${clip.name}</div>
+          <div class="clip-dur">✓ Loaded • ${clip.duration.toFixed(1)}s</div>
         </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleLock(${idx})">${clip.locked ? '🔒' : '🔓'}</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="removeClip(${idx})">✕</button>
+      `;
+      list.appendChild(div);
+    });
+    document.getElementById('totalSourceLabel').textContent = `${sourceClips.length} clips (${total.toFixed(1)}s)`;
+  }
 
-        <input type="file" id="audioFileInput" accept="audio/*" class="hidden" />
+  function toggleLock(idx) { sourceClips[idx].locked = !sourceClips[idx].locked; renderClipList(); }
+  function removeClip(idx) { sourceClips.splice(idx, 1); renderClipList(); }
 
-        <div class="grid grid-cols-2 gap-2.5">
-          <button id="uploadMusicBtn" class="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-borderDark text-xs font-bold text-white flex flex-col items-center justify-center gap-1 transition">
-            <span class="text-base">🎵</span>
-            <span>Upload My Music</span>
-            <span class="text-[10px] font-normal text-slate-400">MP3, WAV, M4A</span>
-          </button>
+  function handleAudioUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    customAudioEl = new Audio();
+    customAudioEl.preload = 'auto';
+    customAudioEl.loop = true;
+    customAudioEl.src = url;
+    customAudioName = file.name;
+    document.getElementById('audioFileName').textContent = `✓ Loaded: ${file.name}`;
+    document.getElementById('audioFileName').style.color = '#10b981';
+  }
 
-          <button id="toggleSynthBeatBtn" class="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-borderDark text-xs font-bold text-emerald-300 flex flex-col items-center justify-center gap-1 transition">
-            <span class="text-base">🎹</span>
-            <span id="synthBtnLabel">Built-In Studio Beat</span>
-            <span class="text-[10px] font-normal text-slate-400">Royalty-Free Synth</span>
-          </button>
-        </div>
+  function getTargetSeconds() {
+    const val = getSelectedChip('lengthChips');
+    if (val === 'custom') return Math.max(5, parseInt(document.getElementById('customSeconds').value || '45', 10));
+    return parseInt(val, 10);
+  }
 
-        <!-- Active Audio Track Banner -->
-        <div id="activeAudioCard" class="hidden flex items-center justify-between bg-slate-950/80 border border-emerald-500/30 rounded-2xl px-3.5 py-2.5">
-          <div class="min-w-0 pr-2">
-            <p id="activeAudioTitle" class="text-xs font-bold text-emerald-300 truncate">Track Name</p>
-            <p id="activeAudioMeta" class="text-[11px] text-slate-400">Ready to mix</p>
-          </div>
-          <button id="removeAudioBtn" class="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-400 text-xs font-bold">Remove</button>
-        </div>
+  function autoMakeReel() {
+    if (!sourceClips.length) {
+      alert('Add at least one MP4 video on Tab 1 first!');
+      switchTab(1);
+      return;
+    }
+    buildAndPreview(false, true);
+  }
 
-        <!-- Audio Mix Sliders -->
-        <div class="space-y-3 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800">
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-300 font-medium">Original Clip Audio Volume</span>
-              <span id="origVolLabel" class="font-mono font-bold text-amber-400">65%</span>
-            </div>
-            <input type="range" id="origVolSlider" min="0" max="100" value="65" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer" />
-          </div>
+  function buildAndPreview(shuffle = false, autoPlay = false) {
+    if (!sourceClips.length) {
+      alert('Please add at least one MP4 file first.');
+      switchTab(1);
+      return;
+    }
 
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-300 font-medium">Added Music Volume</span>
-              <span id="musicVolLabel" class="font-mono font-bold text-emerald-400">85%</span>
+    const aspect = getSelectedChip('aspectChips');
+    const canvas = document.getElementById('previewCanvas');
+    if (aspect === '16:9') { canvas.width = 960; musicVolLabel" class="font-mono font-bold text-emerald-400">85%</span>
             </div>
             <input type="range" id="musicVolSlider" min="0" max="100" value="85" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer" />
           </div>
