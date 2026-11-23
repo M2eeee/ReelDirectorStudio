@@ -1,0 +1,13 @@
+{
+  "appId": "com.kfh.reeldirector",
+  "appName": "ReelDirector Studio",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Media": {
+      "androidGalleryMode": true
+    }
+  }
+}
