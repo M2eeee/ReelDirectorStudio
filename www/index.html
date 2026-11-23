@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>ReelDirector Studio</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #141822;
+    --panel-2: #1c2230;
+    --border: #2a3245;
+    --accent: #3b82f6;
+    --accent-2: #8b5cf6;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 84px;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(11, 13, 18, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { font-weight: 800; font-size: 1.05rem; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: 0.68rem; background: linear-gradient(135deg, var(--accent), var(--accent-2)); padding: 2px 7px; border-radius: 999px; font-weight: 700; }
+  .btn-auto {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 53px;
+    z-index: 25;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 12px 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+  }
+  .tab-btn.active { color: #fff; border-bottom-color: var(--accent); background: rgba(59, 130, 246, 0.08); }
+  .container { max-width: 680px; margin: 0 auto; padding: 14px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .card-title { font-size: 0.92rem; font-weight: 700; margin: 0 0 10px 0; display: flex; justify-content: space-between; align-items: center; }
+  .sub { font-size: 0.78rem; color: var(--muted); }
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 20px 14px;
+    text-align: center;
+    background: var(--panel-2);
+    cursor: pointer;
+  }
+  .upload-zone:active { border-color: var(--accent); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn-secondary { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); }
+  .btn-sm { padding: 7px 11px; font-size: 0.78rem; width: auto; }
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .chip.selected {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .field-row { margin-bottom: 12px; }
+  .field-row label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(42, 50, 69, 0.6);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .clip-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 8px;
+    gap: 8px;
+  }
+  .clip-meta { overflow: hidden; flex: 1; }
+  .clip-name { font-size: 0.84rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .clip-dur { font-size: 0.74rem; color: var(--muted); }
+  canvas {
+    width: 100%;
+    max-height: 420px;
+    background: #000;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+  }
+  .timeline-list { max-height: 220px; overflow-y: auto; margin-top: 10px; }
+  .edl-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    padding: 7px 10px;
+    background: var(--panel-2);
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .status-bar {
+    font-size: 0.8rem;
+    color: var(--warn);
+    margin-top: 8px;
+    text-align: center;
+    min-height: 18px;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">🎬 ReelDirector <span class="badge">STUDIO</span></div>
+  <button class="btn-auto" onclick="autoMakeReel()">⚡ Auto-Make</button>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">1. Clips & Audio</button>
+  <button class="tab-btn" id="tabBtn2" onclick="switchTab(2)">2. Director</button>
+  <button class="tab-btn" id="tabBtn3" onclick="switchTab(3)">3. Preview & Save</button>
+</div>
+
+<div class="container">
+  <!-- TAB 1: CLIPS & AUDIO -->
+  <div class="section active" id="sec1">
+    <div class="card">
+      <div class="card-title">
+        <span>Source MP4 Videos</span>
+        <span class="sub" id="totalSourceLabel">0 clips (0.0s)</span>
+      </div>
+      <div class="upload-zone" onclick="document.getElementById('videoInput').click()">
+        <div style="font-size:1.5rem;margin-bottom:4px;">📁</div>
+        <div style="font-weight:700;font-size:0.9rem;">Tap to Add MP4 Files from Phone</div>
+        <div class="sub">Select multiple videos to compile</div>
+      </div>
+      <input type="file" id="videoInput" accept="video/mp4,video/*" multiple class="hidden" onchange="handleVideoUpload(event)" />
+      <div id="clipList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Music & Audio Track</span><span class="sub">Optional</span></div>
+      <div class="field-row">
+        <button class="btn btn-secondary" onclick="document.getElementById('audioInput').click()">🎵 Pick Audio / Song from Phone</button>
+        <input type="file" id="audioInput" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)" />
+        <div class="sub" id="audioFileName" style="margin-top:6px;">No custom audio selected (using original clip audio)</div>
+      </div>
+      <div class="field-row">
+        <label>Music Volume: <span id="musicVolVal">80%</span></label>
+        <input type="range" id="musicVol" min="0" max="100" value="80" oninput="document.getElementById('musicVolVal').textContent=this.value+'%'" />
+      </div>
+      <div class="field-row">
+        <label>Original Video Audio: <span id="clipVolVal">35%</span></label>
+        <input type="range" id="clipVol" min="0" max="100" value="35" oninput="document.getElementById('clipVolVal').textContent=this.value+'%'" />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Smooth Audio Fade In / Out</span>
+        <input type="checkbox" id="audioFade" checked />
+      </div>
+    </div>
+
+    <button class="btn" onclick="switchTab(2)">Next: Director Controls →</button>
+  </div>
+
+  <!-- TAB 2: DIRECTOR CONTROLS -->
+  <div class="section" id="sec2">
+    <div class="card">
+      <div class="card-title">Target Reel Length</div>
+      <div class="chip-grid" id="lengthChips">
+        <div class="chip selected" data-val="60" onclick="selectChip('lengthChips', this)">1 Min (60s)</div>
+        <div class="chip" data-val="180" onclick="selectChip('lengthChips', this)">3 Min (180s)</div>
+        <div class="chip" data-val="300" onclick="selectChip('lengthChips', this)">5 Min (300s)</div>
+        <div class="chip" data-val="custom" onclick="selectChip('lengthChips', this)">Custom</div>
+      </div>
+      <div class="field-row hidden" id="customLengthBox" style="margin-top:10px;">
+        <label>Custom Length (seconds)</label>
+        <input type="number" id="customSeconds" value="45" min="5" max="1800" />
+      </div>
+      <div class="toggle-row" style="margin-top:8px;">
+        <span style="font-size:0.84rem;">Loop & remix clips if shorter than target</span>
+        <input type="checkbox" id="allowLoop" checked />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Theme / Vibe</div>
+      <div class="chip-grid" id="themeChips">
+        <div class="chip selected" data-val="home" onclick="selectChip('themeChips', this)">🏡 Home Video</div>
+        <div class="chip" data-val="music" onclick="selectChip('themeChips', this)">🎸 Music Video</div>
+        <div class="chip" data-val="cinematic" onclick="selectChip('themeChips', this)">🎥 Cinematic</div>
+        <div class="chip" data-val="energy" onclick="selectChip('themeChips', this)">⚡ High-Energy</div>
+        <div class="chip" data-val="travel" onclick="selectChip('themeChips', this)">🌲 Chill / Travel</div>
+        <div class="chip" data-val="retro" onclick="selectChip('themeChips', this)">📼 Clean Retro</div>
+        <div class="chip" data-val="doc" onclick="selectChip('themeChips', this)">🎙️ Documentary</div>
+        <div class="chip" data-val="neon" onclick="selectChip('themeChips', this)">🌃 Neon Nightlife</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Clip Selection & Aspect Ratio</div>
+      <div class="field-row">
+        <label>Clip Selection Mode</label>
+        <select id="selectionMode">
+          <option value="balanced">Balanced (Even across all videos)</option>
+          <option value="peaks">Action & Motion Peaks</option>
+          <option value="chronological">Chronological Story Order</option>
+          <option value="shuffled">Dynamic Shuffle Mix</option>
+          <option value="fast">Rapid-Fire Montage Cuts</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <label>Aspect Ratio</label>
+        <div class="chip-grid" id="aspectChips">
+          <div class="chip selected" data-val="9:16" onclick="selectChip('aspectChips', this)">9:16 Vertical</div>
+          <div class="chip" data-val="16:9" onclick="selectChip('aspectChips', this)">16:9 Wide</div>
+          <div class="chip" data-val="1:1" onclick="selectChip('aspectChips', this)">1:1 Square</div>
+          <div class="chip" data-val="4:5" onclick="selectChip('aspectChips', this)">4:5 Social</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Transitions & Visual Effects</div>
+      <div class="field-row">
+        <label>Transition Style</label>
+        <select id="transitionStyle">
+          <option value="blend">Blending (Cross-Dissolve)</option>
+          <option value="fade">Smooth Dip to Black</option>
+          <option value="slide">Sleek Slide Wipe</option>
+          <option value="zoom">Zoom Punch Cut</option>
+          <option value="cut">Clean Hard Cut</option>
+        </select>
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Sharpen Clarity</span>
+        <input type="checkbox" id="fxSharpen" checked />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Slow Motion Highlights (0.65x)</span>
+        <input type="checkbox" id="fxSlowMo" />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Smooth Ken Burns Zoom</span>
+        <input type="checkbox" id="fxZoom" checked />
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Remove / Replace Background</span>
+        <input type="checkbox" id="fxBgReplace" onchange="document.getElementById('bgOptions').classList.toggle('hidden', !this.checked)" />
+      </div>
+      <div id="bgOptions" class="hidden" style="padding-top:8px;">
+        <label class="sub">Replacement Backdrop Color</label>
+        <input type="color" id="bgColor" value="#1e293b" style="width:100%;height:36px;border:none;border-radius:8px;margin-top:4px;" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Dynamic Captions & Title Card</div>
+      <div class="toggle-row">
+        <span style="font-size:0.84rem;">Enable Opening Title & Captions</span>
+        <input type="checkbox" id="enableCaptions" />
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <label>Opening Title Text</label>
+        <input type="text" id="titleText" placeholder="e.g., Summer Highlights 2026" />
+      </div>
+      <div class="field-row">
+        <label>Caption Style</label>
+        <select id="captionStyle">
+          <option value="bold">Bold Pop-In</option>
+          <option value="lower">Clean Lower-Third</option>
+          <option value="kinetic">Center Kinetic Subtitle</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" onclick="buildAndPreview()">🎬 Build Highlight Reel →</button>
+  </div>
+
+  <!-- TAB 3: PREVIEW & EXPORT -->
+  <div class="section" id="sec3">
+    <div class="card">
+      <div class="card-title">
+        <span>Reel Preview</span>
+        <span class="sub" id="reelSummaryLabel">Not built yet</span>
+      </div>
+      <canvas id="previewCanvas" width="540" height="960"></canvas>
+      <div class="status-bar" id="statusBar">Add clips and tap Build Highlight Reel</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+        <button class="btn btn-secondary" id="playPauseBtn" onclick="togglePlay()">▶ Play Preview</button>
+        <button class="btn btn-secondary" onclick="buildAndPreview(true)">🔀 Shuffle Cuts</button>
+      </div>
+      <button class="btn" style="margin-top:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);" id="exportBtn" onclick="exportReel()">💾 Export & Save to Gallery</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Generated Cut List</span><span class="sub" id="cutCountLabel">0 cuts</span></div>
+      <div class="timeline-list" id="edlList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let sourceClips = [];
+  let customAudioFile = null;
+  let timeline = [];
+  let isPlaying = false;
+  let playStartTime = 0;
+  let currentReelTime = 0;
+  let totalReelDuration = 60;
+  let animFrameId = null;
+
+  function switchTab(num) {
+    document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === num - 1));
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === num - 1));
+  }
+
+  function selectChip(groupId, el) {
+    document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (groupId === 'lengthChips') {
+      document.getElementById('customLengthBox').classList.toggle('hidden', el.dataset.val !== 'custom');
+    }
+  }
+
+  function getSelectedChip(groupId) {
+    const el = document.querySelector('#' + groupId + ' .chip.selected');
+    return el ? el.dataset.val : '';
+  }
+
+  async function handleVideoUpload(e) {
+    const files = Array.from(e.target.files || []);
+    for (const file of files) {
+      const url = URL.createObjectURL(file);
+      const vid = document.createElement('video');
+      vid.src = url;
+      vid.muted = true;
+      vid.playsInline = true;
+      await new Promise(res => {
+        vid.onloadedmetadata = () => res();
+        vid.onerror = () => res();
+      });
+      sourceClips.push({
+        id: Math.random().toString(36).slice(2),
+        name: file.name,
+        url,
+        video: vid,
+        duration: vid.duration || 5,
+        locked: false
+      });
+    }
+    renderClipList();
+  }
+
+  function renderClipList() {
+    const list = document.getElementById('clipList');
+    list.innerHTML = '';
+    let total = 0;
+    sourceClips.forEach((clip, idx) => {
+      total += clip.duration;
+      const div = document.createElement('div');
+      div.className = 'clip-item';
+      div.innerHTML = `
+        <div class="clip-meta">
+          <div class="clip-name">${clip.name}</div>
+          <div class="clip-dur">${clip.duration.toFixed(1)}s</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="toggleLock(${idx})">${clip.locked ? '🔒' : '🔓'}</button>
+        <button class="btn btn-secondary btn-sm" onclick="removeClip(${idx})">✕</button>
+      `;
+      list.appendChild(div);
+    });
+    document.getElementById('totalSourceLabel').textContent = `${sourceClips.length} clips (${total.toFixed(1)}s)`;
+  }
+
+  function toggleLock(idx) { sourceClips[idx].locked = !sourceClips[idx].locked; renderClipList(); }
+  function removeClip(idx) { sourceClips.splice(idx, 1); renderClipList(); }
+
+  function handleAudioUpload(e) {
+    const file = e.target.files[0];
+    if (file) {
+      customAudioFile = file;
+      document.getElementById('audioFileName').textContent = `Selected: ${file.name}`;
+    }
+  }
+
+  function getTargetSeconds() {
+    const val = getSelectedChip('lengthChips');
+    if (val === 'custom') return Math.max(5, parseInt(document.getElementById('customSeconds').value || '45', 10));
+    return parseInt(val, 10);
+  }
+
+  function autoMakeReel() {
+    if (!sourceClips.length) {
+      alert('Add at least one MP4 video on Tab 1 first!');
+      switchTab(1);
+      return;
+    }
+    buildAndPreview(false, true);
+  }
+
+  function buildAndPreview(shuffle = false, autoPlay = false) {
+    if (!sourceClips.length) {
+      alert('Please add at least one MP4 file first.');
+      switchTab(1);
+      return;
+    }
+
+    const aspect = getSelectedChip('aspectChips');
+    const canvas = document.getElementById('previewCanvas');
+    if (aspect === '16:9') { canvas.width = 960; canvas.height = 540; }
+    else if (aspect === '1:1') { canvas.width = 720; canvas.height = 720; }
+    else if (aspect === '4:5') { canvas.width = 720; canvas.height = 900; }
+    else { canvas.width = 540; canvas.height = 960; }
+
+    totalReelDuration = getTargetSeconds();
+    const theme = getSelectedChip('themeChips');
+    const mode = shuffle ? 'shuffled' : document.getElementById('selectionMode').value;
+    const allowLoop = document.getElementById('allowLoop').checked;
+    const useSlowMo = document.getElementById('fxSlowMo').checked;
+
+    const avgCutLen = theme === 'energy' || mode === 'fast' ? 2.0 : (theme === 'cinematic' || theme === 'doc' ? 4.2 : 3.0);
+    timeline = [];
+    let cursor = 0;
+    let pool = [...sourceClips];
+    if (mode === 'shuffled') pool.sort(() => Math.random() - 0.5);
+
+    let idx = 0;
+    while (cursor < totalReelDuration && pool.length > 0) {
+      const clip = pool[idx % pool.length];
+      const segDur = Math.min(avgCutLen, totalReelDuration - cursor, clip.duration);
+      const maxStart = Math.max(0, clip.duration - segDur);
+      const startOffset = mode === 'chronological'
+        ? ((idx / Math.max(1, pool.length)) * maxStart)
+        : Math.random() * maxStart;
+
+      timeline.push({
+        clip,
+        reelStart: cursor,
+        reelEnd: cursor + segDur,
+        srcStart: startOffset,
+        slowMo: useSlowMo && (idx % 3 === 1),
+        caption: `Moment #${timeline.length + 1}`
+      });
+
+      cursor += segDur;
+      idx++;
+      if (!allowLoop && idx
